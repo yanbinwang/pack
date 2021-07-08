@@ -1,0 +1,108 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    //配置签名
+    signingConfigs {
+        debug {
+            keyAlias 'hm'
+            keyPassword 'hm940507'
+            storeFile file('./sqkjhm.jks')
+            storePassword 'hm940507'
+        }
+
+        release {
+            keyAlias 'hm'
+            keyPassword 'hm940507'
+            storeFile file('./sqkjhm.jks')
+            storePassword 'hm940507'
+        }
+    }
+
+    compileSdkVersion 30
+
+    //各渠道可配置多个参数，包含buildConfigField ，友盟的配置等-->https://blog.csdn.net/abc6368765/article/details/52786509/
+    flavorDimensions "dataqin"
+    productFlavors {
+        //debug会根据渠道首字母打一个包
+        flavors_oes {
+            applicationId = "com.sqkj.oes"
+            //如果在这里添加，则string.xml内不能有这个字段，否则会造成重名
+            resValue "string", "app_name", "简证"
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: name,
+                                    AMAP_API_KEY       : "83dbb3c877523f5ea15106fb8710c34e",
+                                    app_icon           : "@mipmap/ic_launcher",
+                                    app_round_icon     : "@mipmap/ic_launcher_round"]
+        }
+        flavors_sxevidence {
+            applicationId = "com.sqkj.sxevidence"
+            resValue "string", "app_name", "尚信"
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: name,
+                                    AMAP_API_KEY       : "bdf5c8225fd8802867a3bb89dbae12c6",
+                                    app_icon           : "@mipmap/ic_launcher",
+                                    app_round_icon     : "@mipmap/ic_launcher_round"]
+        }
+        flavors_tzevidence {
+            applicationId = "com.sqkj.tzevidence"
+            resValue "string", "app_name", "苏存证"
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: name,
+                                    AMAP_API_KEY       : "28dda952ff7b022b658fb23d1dd9a9c6",
+                                    app_icon           : "@mipmap/ic_launcher",
+                                    app_round_icon     : "@mipmap/ic_launcher_round"]
+        }
+    }
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    //移除lint检测的error
+    lintOptions {
+        abortOnError false
+    }
+
+    //支持java1.8
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        //测试环境
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        //生产环境
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release//签名release包
+            //执行多渠道打包
+            applicationVariants.all { variant ->
+                variant.outputs.all {
+                    // 输出apk名称为netcar_v1.0_20170627_umeng.apk
+                    outputFileName = "evidence_v${defaultConfig.versionName}_" + new Date().format('yyyyMMdd') + "_${variant.productFlavors[0].name}.apk"
+                }
+            }
+        }
+    }
+
+}
+
+dependencies {
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'androidx.core:core-ktx:1.3.2'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
